@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello Tone.js</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+  </head>
+  <body>
+    <div class="keyboard-container">
+      <div class="keyboard-row">
+        <button class="inactive key">1</button>
+        <button class="black key">2</button>
+        <button class="black key">3</button>
+        <button class="inactive key">4</button>
+        <button class="black key">5</button>
+        <button class="black key">6</button>
+        <button class="black key">7</button>
+        <button class="inactive key">8</button>
+        <button class="inactive key">9</button>
+        <button class="inactive key">0</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="invisible key">x</button>
+        <button class="white key">q</button>
+        <button class="white key">w</button>
+        <button class="white key">e</button>
+        <button class="white key">r</button>
+        <button class="white key">t</button>
+        <button class="white key">y</button>
+        <button class="white key">u</button>
+        <button class="inactive key">i</button>
+        <button class="inactive key">o</button>
+        <button class="inactive key">p</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="inactive key">a</button>
+        <button class="black key">s</button>
+        <button class="black key">d</button>
+        <button class="inactive key">f</button>
+        <button class="black key">g</button>
+        <button class="black key">h</button>
+        <button class="black key">j</button>
+        <button class="inactive key">k</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="white key">z</button>
+        <button class="white key">x</button>
+        <button class="white key">c</button>
+        <button class="white key">v</button>
+        <button class="white key">b</button>
+        <button class="white key">n</button>
+        <button class="white key">m</button>
+      </div>
+    </div>
+    
+    <button id="start-button">Start Audio</button>
+
+    <p>Tuning type:</p>
+    <div>
+      <input type="radio" name="tuning" value="equal" id="equal" checked="true">
+      <label for="equal">Equal temperament</label>
+    </div>
+    <div>
+      <input type="radio" name="tuning" value="just" id="just">
+      <label for="equal">Just temperament</label>
+    </div>
+
+    <div class="octave-container">
+      <button class="octave-button" id="octave-minus">-</button>
+      <p class="octave-value">4</p>
+      <button class="octave-button" id="octave-plus">+</button>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
