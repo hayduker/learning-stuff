@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello Tone.js</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+  </head>
+  <body>
+    <div class="page-container" id="page-container">
+      <button id="start-button">Start Audio</button>
+
+      <div class="control-panel">
+        <div class="octave-container">
+          <div class="octave-title">Octave:</div>
+          <div class="octave-controls">
+            <button class="octave-button" id="octave-minus">-</button>
+            <p class="octave-value">4</p>
+            <button class="octave-button" id="octave-plus">+</button>
+          </div>
+        </div>
+
+        <div class="numharm-container">
+          <div class="numharm-title">Number of Harmonics:</div>
+          <div class="numharm-controls">
+            <button class="numharm-button" id="numharm-minus">-</button>
+            <p class="numharm-value">1</p>
+            <button class="numharm-button" id="numharm-plus">+</button>
+          </div>
+        </div>
+
+        <div class="tuning-controls">
+          <p>Harmonic type:</p>
+          <div>
+            <input type="radio" name="spread" value="regular" id="regular" checked="true">
+            <label for="regular">Regular</label>
+          </div>
+          <div>
+            <input type="radio" name="spread" value="spread" id="spread">
+            <label for="spread">Spread</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>

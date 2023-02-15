@@ -9,23 +9,29 @@
     <div class="page-container" id="page-container">
       <button id="start-button">Start Audio</button>
 
-      <p>Tuning type:</p>
-      <div>
-        <input type="radio" name="tuning" value="equal" id="equal" checked="true">
-        <label for="equal">Equal temperament</label>
+      <div class="control-panel">
+        <div class="tuning-controls">
+          <p>Tuning type:</p>
+          <div>
+            <input type="radio" name="tuning" value="equal" id="equal" checked="true">
+            <label for="equal">Equal temperament</label>
+          </div>
+          <div>
+            <input type="radio" name="tuning" value="just" id="just">
+            <label for="equal">Pythagorean</label>
+          </div>
+        </div>
+  
+        <div class="octave-container">
+          <div class="octave-title">Octave:</div>
+          <div class="octave-controls">
+            <button class="octave-button" id="octave-minus">-</button>
+            <p class="octave-value">4</p>
+            <button class="octave-button" id="octave-plus">+</button>
+          </div>
+        </div>
       </div>
-      <div>
-        <input type="radio" name="tuning" value="just" id="just">
-        <label for="equal">Just temperament</label>
       </div>
-
-      <div class="octave-container">
-        <button class="octave-button" id="octave-minus">-</button>
-        <p class="octave-value">4</p>
-        <button class="octave-button" id="octave-plus">+</button>
-      </div>
-    </div>
-
     <script src="main.js"></script>
   </body>
 </html>

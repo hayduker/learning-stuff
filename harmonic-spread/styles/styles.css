@@ -125,3 +125,22 @@ body {
 .octave-value {
     margin: 0 8px;
 }
+
+
+.numharm-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.numharm-controls {
+    display: flex;
+}
+
+.numharm-button {
+    width: 22px;
+    height: 22px;
+}
+
+.numharm-value {
+    margin: 0 8px;
+}
