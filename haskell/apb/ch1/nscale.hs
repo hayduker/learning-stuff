@@ -26,10 +26,13 @@ nToneChromatic midiStart notesInOctave = zipWith transpose freqs notes
           ratio = getRatio notesInOctave
           transpose f n = f * ratio ^ n
 
-main :: IO ()
-main = do strings <- getArgs
-          if (length strings) /= 2
-          then error "Invalid number of arguments."
-          else mapM_ putStrLn strings
+validMidi :: Int -> Bool
+validMidi note = 0 <= note && note <= 127
 
+main :: IO ()
+main = do args <- getArgs
+          let midiStart = read $ head args
+          let notesInOctave = read $ head $ tail args
+          let scale = nToneChromatic midiStart notesInOctave
+          mapM_ (putStrLn . show) scale
 
