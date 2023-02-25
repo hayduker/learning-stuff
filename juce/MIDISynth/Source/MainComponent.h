@@ -11,9 +11,14 @@ struct SineWaveSound : public juce::SynthesiserSound
 };
 
 
-struct SineWaveVoice   : public juce::SynthesiserVoice
+struct SineWaveVoice : public juce::SynthesiserVoice
 {
-    SineWaveVoice() {}
+    SineWaveVoice(const juce::AudioSampleBuffer& wavetableToUse) :
+        wavetable(wavetableToUse),
+        tableSize(wavetable.getNumSamples())
+    {
+        jassert(wavetable.getNumChannels() == 1);
+    }
 
     bool canPlaySound (juce::SynthesiserSound* sound) override
     {
@@ -23,14 +28,12 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
     void startNote (int midiNoteNumber, float velocity,
                     juce::SynthesiserSound*, int currentPitchWheelPosition) override
     {
-        currentAngle = 0.0;
+        currentIndex = 0.0f;
         level = velocity * 0.15;
         tailOff = 0.0;
 
-        auto cyclesPerSecond = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-        auto cyclesPerSample = cyclesPerSecond / getSampleRate();
-
-        angleDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;
+        auto hz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+        setFrequency(hz, getSampleRate());
     }
 
     void setSustain(double newSustain)
@@ -48,27 +51,52 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
         else
         {
             clearCurrentNote();
-            angleDelta = 0.0;
+            tableDelta = 0.0;
         }
     }
 
     void pitchWheelMoved (int) override      {}
     void controllerMoved (int, int) override {}
 
-    void renderNextBlock (juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    void setFrequency(float frequency, float sampleRate)
     {
-        if (angleDelta != 0.0)
+        auto tableSizeOverSampleRate = (float)tableSize / sampleRate;
+        tableDelta = frequency * tableSizeOverSampleRate;
+    }
+
+    forcedinline float getNextSample() noexcept
+    {
+        auto tableSize = wavetable.getNumSamples();
+
+        auto idx0 = (unsigned int)currentIndex;
+        auto idx1 = idx0 + 1;
+
+        auto frac = currentIndex - (float)idx0;
+        auto* table = wavetable.getReadPointer(0);
+        auto sample0 = table[idx0];
+        auto sample1 = table[idx1];
+
+        auto currentSample = sample0 + frac * (sample1 - sample0);
+
+        if ((currentIndex += tableDelta) > (float)tableSize)
+            currentIndex -= (float)tableSize;
+
+        return currentSample;
+    }
+
+    void renderNextBlock(juce::AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    {
+        if (tableDelta != 0.0)
         {
             if (tailOff > 0.0)
             {
                 while (--numSamples >= 0)
                 {
-                    auto currentSample = (float) (std::sin (currentAngle) * level * tailOff);
+                    auto sample = (float)(getNextSample() * level * tailOff);
 
                     for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
-                        outputBuffer.addSample (i, startSample, currentSample);
+                        outputBuffer.addSample(i, startSample, sample);
 
-                    currentAngle += angleDelta;
                     ++startSample;
 
                     tailOff *= sustain;
@@ -77,7 +105,7 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
                     {
                         clearCurrentNote();
 
-                        angleDelta = 0.0;
+                        tableDelta = 0.0;
                         break;
                     }
                 }
@@ -86,12 +114,11 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
             {
                 while (--numSamples >= 0)
                 {
-                    auto currentSample = (float) (std::sin (currentAngle) * level);
+                    auto sample = (float)(getNextSample() * level);
 
                     for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
-                        outputBuffer.addSample (i, startSample, currentSample);
+                        outputBuffer.addSample(i, startSample, sample);
 
-                    currentAngle += angleDelta;
                     ++startSample;
                 }
             }
@@ -99,7 +126,10 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
     }
 
 private:
-    double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0, sustain = 0.99;
+    const juce::AudioSampleBuffer& wavetable;
+    const int tableSize;
+    float currentIndex = 0.0f, tableDelta = 0.0f;
+    double level = 0.0, tailOff = 0.0, sustain = 0.99;
 };
 
 
@@ -115,9 +145,13 @@ public:
     void setSustain(double sustain);
 
 private:
+    void createWavetable();
+
     juce::MidiMessageCollector midiCollector;
     juce::MidiKeyboardState& keyboardState;
     juce::Synthesiser synth;
+    const unsigned int tableSize = 1 << 7;
+    juce::AudioSampleBuffer wavetable;
     std::vector<SineWaveVoice*> voices;
     int numVoices;
 };
@@ -140,6 +174,10 @@ public:
 private:
     void timerCallback() override;
     void setMidiInput(int index);
+
+    juce::Label cpuUsageLabel;
+    juce::Label cpuUsageText;
+    bool keyboardGrabbed = false;
 
     juce::MidiKeyboardState keyboardState;
     SynthAudioSource synthAudioSource;

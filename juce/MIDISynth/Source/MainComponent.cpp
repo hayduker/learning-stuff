@@ -3,11 +3,13 @@
 
 SynthAudioSource::SynthAudioSource(juce::MidiKeyboardState& keyState) :
     keyboardState(keyState),
-    numVoices(4)
+    numVoices(8)
 {
+    createWavetable();
+
     for (auto i = 0; i < numVoices; i++)
     {
-        auto voice = new SineWaveVoice();
+        auto voice = new SineWaveVoice(wavetable);
         synth.addVoice(voice);
         voices.push_back(voice);
     }
@@ -49,6 +51,34 @@ juce::MidiMessageCollector* SynthAudioSource::getMidiCollector()
 void SynthAudioSource::setSustain(double sustain)
 {
     for (auto voice : voices) voice->setSustain(sustain);
+}
+
+void SynthAudioSource::createWavetable()
+{
+    wavetable.setSize(1, (int)tableSize + 1);
+    wavetable.clear();
+
+    auto* samples = wavetable.getWritePointer(0);
+
+    int harmonics[] = { 1, 2, 3, 4};
+    float harmonicWeights[] = { 0.5f, 0.4f, 0.3f, 0.2f };
+
+    jassert (juce::numElementsInArray (harmonics) == juce::numElementsInArray(harmonicWeights));
+
+    for (auto harmonic = 0; harmonic < juce::numElementsInArray(harmonics); ++harmonic)
+    {
+        auto angleDelta = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * harmonics[harmonic];
+        auto currentAngle = 0.0;
+
+        for (unsigned int i = 0; i < tableSize; ++i)
+        {
+            auto sample = std::sin(currentAngle);
+            samples[i] += (float)sample * harmonicWeights[harmonic];
+            currentAngle += angleDelta;
+        }
+    }
+
+    samples[tableSize] = samples[0];
 }
 
 
@@ -101,6 +131,12 @@ MainComponent::MainComponent() :
         synthAudioSource.setSustain(sustainSlider.getValue());
     };
 
+    cpuUsageLabel.setText ("CPU Usage", juce::dontSendNotification);
+    cpuUsageText.setJustificationType (juce::Justification::right);
+    addAndMakeVisible (cpuUsageLabel);
+    addAndMakeVisible (cpuUsageText);
+
+
     setAudioChannels(0, 2);
     
     setSize(600, 190);
@@ -135,14 +171,23 @@ void MainComponent::paint (juce::Graphics& g)
 void MainComponent::resized()
 {
     midiInputList    .setBounds(200, 10, getWidth() - 210, 20);
-    keyboardComponent.setBounds(10,  40, getWidth() - 20,  getHeight() - 80);
-    sustainSlider    .setBounds(90, getHeight() - 30, getWidth() - 100, 20);
+    keyboardComponent.setBounds(10,  40, getWidth() - 20,  getHeight() - 110);
+    sustainSlider    .setBounds(90, getHeight() - 60, getWidth() - 100, 20);
+    cpuUsageLabel.setBounds (10, getHeight() - 30, getWidth() - 20, 20);
+    cpuUsageText .setBounds (10, getHeight() - 30, getWidth() - 20, 20);
 }
 
 void MainComponent::timerCallback()
 {
-    keyboardComponent.grabKeyboardFocus();
-    stopTimer();
+    if (!keyboardGrabbed)
+    {
+        keyboardComponent.grabKeyboardFocus();
+        keyboardGrabbed = true;
+        startTimer(50);
+    }
+    
+    auto cpu = deviceManager.getCpuUsage() * 100;
+    cpuUsageText.setText(juce::String(cpu, 6) + " %", juce::dontSendNotification);
 }
 
 void MainComponent::setMidiInput(int index)
