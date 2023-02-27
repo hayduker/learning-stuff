@@ -82,7 +82,7 @@ MainComponent::~MainComponent()
 
 void MainComponent::prepareToPlay (int, double sampleRate)
 {
-    auto numberOfOscillators = 1;
+    auto numberOfOscillators = 200;
 
     for (auto i = 0; i < numberOfOscillators; ++i)
     {

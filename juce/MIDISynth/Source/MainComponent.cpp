@@ -60,8 +60,8 @@ void SynthAudioSource::createWavetable()
 
     auto* samples = wavetable.getWritePointer(0);
 
-    int harmonics[] = { 1, 2, 3, 4};
-    float harmonicWeights[] = { 0.5f, 0.4f, 0.3f, 0.2f };
+    int harmonics[] = { 1 };
+    float harmonicWeights[] = { 1.0f };
 
     jassert (juce::numElementsInArray (harmonics) == juce::numElementsInArray(harmonicWeights));
 
