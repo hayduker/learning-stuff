@@ -1,0 +1,47 @@
+Prog  → Dcls Stmts $
+Dcls  → Dcl Dcls
+      | λ
+Dcl   → floatdcl id
+      | intdcl id
+Stmts → Stmt Stmts
+      | λ
+Stmt  → id assign Val Expr
+      | print id
+Expr  → plus Val Expr
+      | minus Val Expr
+      | λ
+Val   → id
+      | inum
+      | fnum
+
+
+i a
+f b
+a = 3
+b = 4.3 + a
+p b
+
+<Prog>
+[<Dcls> Stmts $]
+[<Dcl> Dcls] Stmts $
+[i a] <Dcls> Stmts $
+i a [<Dcl> Dcls] Stmts $
+i a [f b] <Dcls> Stmts $
+i a f b [λ] <Stmts> $
+i a f b [<Stmt> Stmts] $
+i a f b ...
+
+
+Prog
+Dcls Stmts $
+
+if Dcls and Stmts both lambda:
+      $
+
+if Dcls not lambda:
+      floatdcl
+      intdcl
+      id
+      print
+
+
