@@ -18,7 +18,7 @@ MainComponent::MainComponent() :
     loopBuffer.setSize(1, 44100 * 4);
 
     DBG("Constructor called, setting audio channels");
-    setAudioChannels(1,2);
+    setAudioChannels(2,2);
 }
 
 MainComponent::~MainComponent()
@@ -30,19 +30,20 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    std::cout << "i = " << i << std::endl;
+
     auto outputSamplesOffset = bufferToFill.startSample;
 
-    auto* loopReader = loopBuffer.getReadPointer(0, 0);
+    auto* loopReader = loopBuffer.getReadPointer (0, 0);
     auto* loopWriter = loopBuffer.getWritePointer(0, 0);
 
-//    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++)
-//    {
-        auto* inBuffer  = bufferToFill.buffer->getReadPointer (0, 0);
-        auto* outBuffer = bufferToFill.buffer->getWritePointer(0, 0);
+    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++)
+    {
+        auto* inBuffer  = bufferToFill.buffer->getReadPointer (channel, 0);
+        auto* outBuffer = bufferToFill.buffer->getWritePointer(channel, 0);
 
         for (auto sample = outputSamplesOffset; sample < bufferToFill.numSamples; sample++)
-        {
-            
+        {   
             if (state == Recording)
             {
                 if (!firstSampleAfterRecording)
@@ -96,17 +97,19 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
             }
             
         }
- //   }
+    }
+
+    i++;
 }
 
 void MainComponent::releaseResources()
 {
-    loopBuffer.setSize (0, 0);
+    loopBuffer.setSize(0, 0);
 }
 
 void MainComponent::paint (juce::Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 void MainComponent::resized()
@@ -122,7 +125,7 @@ void MainComponent::recordButtonClicked()
     {
         DBG("state = Stopped, start recording");
         state = Recording;
-        recordButton.setButtonText ("Play");
+        recordButton.setButtonText("Play");
         recordButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
     }
     else if (state == Recording || state == Overdubbing)
@@ -130,7 +133,7 @@ void MainComponent::recordButtonClicked()
         DBG("state = Recording, start playing");
         state = Playing;
 
-        recordButton.setButtonText ("Overdub");
+        recordButton.setButtonText("Overdub");
         recordButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkgoldenrod);
         recordButton.setEnabled(true);
     }
@@ -138,7 +141,7 @@ void MainComponent::recordButtonClicked()
     {
         DBG("state = Stopped, start overdubbing");
         state = Overdubbing;
-        recordButton.setButtonText ("Play");
+        recordButton.setButtonText("Play");
         recordButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);        
     }
 }
@@ -150,7 +153,7 @@ void MainComponent::clearButtonClicked()
     loopBuffer.clear(0,loopLength);
     loopLength = 0;
 
-    recordButton.setButtonText ("Record");
+    recordButton.setButtonText("Record");
     recordButton.setColour(juce::TextButton::buttonColourId, juce::Colours::red);
     recordButton.setEnabled(true);
 }

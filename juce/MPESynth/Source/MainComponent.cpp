@@ -13,8 +13,8 @@ void MPEDemoSynthVoice::noteStarted()
     jassert(currentlyPlayingNote.keyState == juce::MPENote::keyDown ||
             currentlyPlayingNote.keyState == juce::MPENote::keyDownAndSustained);
 
-    double clampedPressure = 0.5 + currentlyPlayingNote.pressure.asUnsignedFloat() * 0.5;
-    double clampedTimbre   = 0.5 * currentlyPlayingNote.timbre.asUnsignedFloat();
+    double clampedPressure = currentlyPlayingNote.pressure.asUnsignedFloat(); // 0.5 + currentlyPlayingNote.pressure.asUnsignedFloat() * 0.5;
+    double clampedTimbre   = currentlyPlayingNote.timbre.asUnsignedFloat(); // 0.5 * currentlyPlayingNote.timbre.asUnsignedFloat();
 
     level    .setTargetValue(clampedPressure);
     frequency.setTargetValue(currentlyPlayingNote.getFrequencyInHertz());
@@ -178,7 +178,7 @@ void MainComponent::resized()
 {
     midiInputList    .setBounds(200, 10, getWidth() - 210, 20);
 
-    auto visualizerCompWidth = 2800;
+    auto visualizerCompWidth = getWidth();
     auto visualizerCompHeight = 300;
 
     auto r = getLocalBounds();
